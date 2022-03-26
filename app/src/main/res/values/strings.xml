@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SimpleInstagram</string>
+    <string name="textPassword">textPassword</string>
+    <string name="textUsername">textUsername</string>
+</resources>
