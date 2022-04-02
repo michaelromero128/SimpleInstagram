@@ -15,35 +15,48 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import com.example.simpleinstagram.fragments.ComposeFragment
+import com.example.simpleinstagram.fragments.HomeFragment
+import com.example.simpleinstagram.fragments.ProfileFragment
+import com.google.android.material.bottomnavigation.BottomNavigationItemView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.parse.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    lateinit var posts:MutableList<Post>;
-    var gotPosts: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        findViewById<Button>(R.id.btSubmit).setOnClickListener{
-            val description = findViewById<EditText>(R.id.etDescription).text.toString()
-            if(photoFile != null) {
-                submitPost(description, ParseUser.getCurrentUser(), photoFile!!)
-            }else{
-                Log.e("CUSTOMA","Didn't take photo")
+        val fragmentManager: FragmentManager = supportFragmentManager
+        findViewById<BottomNavigationView>(R.id.bottom_navigation).setOnItemSelectedListener {
+            item->
+            var fragment: Fragment? = null
+
+            when(item.itemId){
+                R.id.action_home-> {
+                    fragment = HomeFragment()
+                }
+                R.id.action_compose ->{
+                    fragment = ComposeFragment()
+                }
+                R.id.action_profile ->{
+                    fragment = ProfileFragment()
+                }
             }
-        }
-        findViewById<Button>(R.id.btTakePicture).setOnClickListener{
-            onLaunchCamera()
+            if(fragment != null){
+                fragmentManager.beginTransaction().replace(R.id.flContainer,fragment).commit()
+            }
 
-        }
-        findViewById<Button>(R.id.btLogOut).setOnClickListener{
-            ParseUser.logOut();
-            finish();
+            true
         }
 
+        findViewById<BottomNavigationView>(R.id.bottom_navigation).setSelectedItemId(R.id.action_compose)
     }
     fun submitPost(description: String, user:ParseUser,photoFile:File){
         val post = Post()
@@ -60,21 +73,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    fun queryPosts(){
-        val query: ParseQuery<Post> = ParseQuery.getQuery(Post::class.java)
-        query.include(Post.KEY_USER)
-        query.findInBackground(object: FindCallback<Post>{
-            override fun done(objects: MutableList<Post>?, e: ParseException?) {
-                if(e != null){
-                    Log.e("CUSTOMA","Error fetching posts")
-                }else{
-                    posts = objects!!;
-                    gotPosts = true;
-                }
-            }
 
-        })
-    }
 
     val REQUEST_IMAGE_CAPTURE =1
     val photoFileName = "photo.jpg"
